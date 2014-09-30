@@ -1,0 +1,127 @@
+#!/usr/bin/perl 
+use strict; 
+use warnings; 
+use diagnostics; 
+
+my $counter = 1;
+my $source = "O:\\xml-examples"; #Directory of XML files
+my $dest = "$source" . "\\results"; #Directory of future .txt results files
+
+#Scan given directory (currently hardcoded, but can use @ARGV[0]) for .xml files and no other files or directories.
+opendir(XMLFILES, $source) || die "Can't open $source: \n$!\n";
+my @xmls; #List of the XML docs in the given directory(ies)
+
+mkdir($dest) unless (-d $dest);
+
+my @files = grep /\.xml/i, readdir(XMLFILES);
+
+foreach my $filename (@files) {
+	#Make a results directory within the XML folder unless it already
+	#contains one.
+	#if ($filename =~ m#[.]xml$#i) {
+		(my $basename = $filename) =~ s#[.]xml$##i;
+		$basename .= "_results.txt"; #remove .xml and append _result.txt instead
+		#print "$counter\t$basename\n";
+		open(FILE, ">$dest/$basename"); #create empty .txt files in the results directory for each XML file
+		push(@xmls, $source."\\".$filename); #Create an array of the xml file paths
+	
+}
+closedir(XMLFILES); #Don't forget to close the opened directory(ies)!
+
+#print "\n@xmls\n";
+
+#Time to work on each individual xml file and append the results to the empty _results.txt files 
+#for(my $i = 0; $i < ($#xmls+1); $i++) {
+	my $xml = $xmls[0]; #$i
+	#Create an array of tags (i.e. string literals of the form <stuff> or </stuff>) for each file
+	my @tags; 
+	#print "\n$xml\t$counter\n";
+	#$counter++;
+
+	open(FILE, "<", $xml) || die "Can't open file $xml: \n$!\n";
+	while(my $line = <FILE>) { #Reading each XML doc line-by-line
+		#print "$line\n"; 
+		#chomp($line); #Remove string endings, the default being \newlines
+		#print "$line\n";
+#		print "\n$counter\n";
+		$counter++; #XML file F1 gives 3 lines!!
+
+		while ($line =~ m#<[^>]+>#sg) { #Gets rid of lines in XML file that have no tags in them at all
+			my $tag = $&;
+			if ($tag  !~ m#</#) {
+				if ($tag =~ m#<(\w+)#si) {
+					my $tagname = $1;
+					my $rest = $';
+					print "my tag: $tagname\n";
+					my %results = ext($rest);
+					foreach my $key (sort(keys(%results))) {
+						my $val = $results{$key};
+						print "$key --> $val\n";
+					}
+				}
+#				(my $tagname = $tag) =~ s#^<(\w+).*?$#$1#;
+
+			}
+
+		}
+#			push(@tags, $& . ">\n");
+			#forall(@tags) {
+				#if($tags =~
+			#print "\n$&\n";
+			#print "\n$temp\n"; 
+			#print "\n$line\n\n\n";
+			#if($line =~ m#<([^ >/]+)#) {
+				#my @temp = split(m $line);
+				#print $#temp;
+#			   (my $temp = $line) =~ m#(<[^>]*.+>{1})#; #Grabs
+			    #my $tagname = "$1\n";
+				#forall(@temp) {
+				#	print "$1\n";
+				#}
+			#}
+		#print $#tags;
+		#push(@tags, $&);
+	#	print "@tags";
+}
+	close(FILE);
+	#exit();
+#}
+
+sub ext {
+	my ($attr) = @_;
+	my %hash;
+	while($attr =~ m#\s+([^=]+)="([^"]+)"#s) {
+		$attr = $';
+		my $att = $1;
+		my $val = $2;
+		$hash{$att} =  $val;
+	}
+	return %hash;
+}
+
+exit();
+
+=This block of code will take the contents of the $tag (i.e. $&) and print out the attributes and values 
+#EXTRACT: foreach my $i (@tagnames) {
+		 print "$i\n";
+#		 if ($i =~ m#<([^ >/]+)#) { 
+	#		my $tagname = "$1\n";
+		#	push(@tagdata, "$1\n");
+			#print @tagdata;
+		 last;
+#	        my $aftertext= $tag $'; #Everything following that tag is stored as a string literal in a scalar variale by using the $' metacharacter, also defined above
+		#print "$aftertext\n";
+		#if ($tag =~ m#<([^ >/]+)#) {
+		#	$tagname = $1;
+		#	if $aftertext =~ m#</$tagname>#
+		#	       my $tagtext = $`;
+		 #<([^ />]+)#
+		#$tagname = $1;
+		#$mtch = $&;
+		#if $mtch =
+		#print "$tag\n";
+		#$counter++;
+#		print $tag;
+	}
+}=cut 
+
